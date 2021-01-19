@@ -3,6 +3,7 @@ import { Task, TaskStatus } from './tasks.model';
 import { TasksService } from './tasks.service';
 import { CreateTaskDTO } from './dto/create-task.dto';
 import { GetTasksFilterDTO } from './dto/get-tasks-filter.dto';
+import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
 
 @Controller('tasks')
 export class TasksController {
@@ -11,7 +12,7 @@ export class TasksController {
   ) {}
 
   @Get()
-  getTasks(@Query() filterDto: GetTasksFilterDTO): Task[] {
+  getTasks(@Query(ValidationPipe) filterDto: GetTasksFilterDTO): Task[] {
     if (Object.keys(filterDto).length) {
       return this.tasksService.getTasksWithFilters(filterDto);
     } else {
@@ -31,12 +32,12 @@ export class TasksController {
   }
 
   @Delete('/:id')
-  deleteTaskById(@Param('id') id: string): Task[] | boolean {
+  deleteTaskById(@Param('id') id: string): void {
     return this.tasksService.deleteTaskById(id);
   }
 
   @Patch('/:id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: TaskStatus): Task {
+  updateStatus(@Param('id') id: string, @Body('status', TaskStatusValidationPipe) status: TaskStatus): Task {
     return this.tasksService.updateStatus(id, status);
   }
 
