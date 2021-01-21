@@ -1,11 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task, TaskStatus } from './tasks.model';
+// import { Task, TaskStatus } from './tasks.model'; -- remove comment if you want to use the non database version of the app
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTaskDTO } from './dto/create-task.dto';
 import { GetTasksFilterDTO } from './dto/get-tasks-filter.dto';
+import { TaskRepository } from './task.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Task } from './task.entity';
+import { TaskStatus } from './tasks.model';
 
 @Injectable()
 export class TasksService {
+  
+  constructor(
+    @InjectRepository(TaskRepository)
+    private taskRepository: TaskRepository) {
+  }
+
+  public async getTaskById(id: number): Promise<Task> {
+    const foundTask = await this.taskRepository.findOne(id);
+
+    if (!foundTask) {
+      throw new NotFoundException(`Task with <<${id}>> not found`);
+    }
+
+    return foundTask;
+  }
+
+  public async createTask(createTaskDTO: CreateTaskDTO) {
+    const { title, description } = createTaskDTO; // Sugar Syntax from ES6 that extracts only the keys of the object that we care for
+    const task = new Task();
+    task.title = title;
+    task.description = description;
+    task.status = TaskStatus.OPEN;
+
+    await task.save();
+
+    return task;
+  }
+
+  /* NOTE: REMOVE THE COMMENT IN THIS SECTION IN ORDER TO RUN THE APPLICATION WITHOUT DATABASE AND ENTITIES NOR TYPEORM
   private tasks: Array<Task> = [];
 
   public getAllTasks(): Task[] {
@@ -63,4 +96,5 @@ export class TasksService {
 
     return task;
   }
+*/
 }
