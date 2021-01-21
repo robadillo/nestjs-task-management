@@ -6,7 +6,8 @@ import { GetTasksFilterDTO } from './dto/get-tasks-filter.dto';
 import { TaskRepository } from './task.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
-import { TaskStatus } from './tasks.model';
+// import { TaskStatus } from './tasks.model';
+import { TaskStatus } from './task-status.enum';
 
 @Injectable()
 export class TasksService {
@@ -26,16 +27,40 @@ export class TasksService {
     return foundTask;
   }
 
-  public async createTask(createTaskDTO: CreateTaskDTO) {
-    const { title, description } = createTaskDTO; // Sugar Syntax from ES6 that extracts only the keys of the object that we care for
-    const task = new Task();
-    task.title = title;
-    task.description = description;
-    task.status = TaskStatus.OPEN;
+  public async createTask(createTaskDTO: CreateTaskDTO): Promise<Task> {
+    // NOTE: This code commented is the implementation of the method using the ENTITY directly here
+    // const { title, description } = createTaskDTO;
+    // const task = new Task();
+    // task.title = title;
+    // task.description = description;
+    // task.status = TaskStatus.OPEN;
 
-    await task.save();
+    // await task.save();
+    // return task;
 
-    return task;
+    return this.taskRepository.createTask(createTaskDTO);
+  }
+
+  public async deleteTaskById(id: number): Promise<void> {
+    const result = await this.taskRepository.delete(id); //Here is not necessary to call logic in the repository because we can call the delete right here
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with <<${id}>> not found`);
+    }
+
+    return;
+  }
+
+  public async updateTaskStatus(id: number, status: TaskStatus): Promise<Task> {
+    const taskFound = await this.getTaskById(id);
+    taskFound.status = status;
+    await taskFound.save();
+
+    return taskFound;
+  }
+
+  public async getTasks(filterDTO: GetTasksFilterDTO): Promise<Task[]> {
+    return this.taskRepository.getTasks(filterDTO);
   }
 
   /* NOTE: REMOVE THE COMMENT IN THIS SECTION IN ORDER TO RUN THE APPLICATION WITHOUT DATABASE AND ENTITIES NOR TYPEORM

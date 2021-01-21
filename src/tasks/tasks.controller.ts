@@ -5,12 +5,18 @@ import { CreateTaskDTO } from './dto/create-task.dto';
 import { GetTasksFilterDTO } from './dto/get-tasks-filter.dto';
 import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
 import { Task } from './task.entity';
+import { TaskStatus } from './task-status.enum';
 
 @Controller('tasks')
 export class TasksController {
   constructor(
     private tasksService: TasksService
   ) {}
+
+  @Get()
+  getTasks(@Query(ValidationPipe) filterDto: GetTasksFilterDTO): Promise<Task[]> {
+    return this.tasksService.getTasks(filterDto);
+  }
 
   @Get('/:id')
   getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
@@ -21,6 +27,19 @@ export class TasksController {
   @UsePipes(ValidationPipe)
   createTask(@Body() createTaskDTO: CreateTaskDTO): Promise<Task> {
     return this.tasksService.createTask(createTaskDTO);
+  }
+
+  @Delete('/:id')
+  deleteTaskById(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.tasksService.deleteTaskById(id);
+  }
+
+  @Patch('/:id/status')
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status', TaskStatusValidationPipe) status: TaskStatus
+  ): Promise<Task> {
+    return this.tasksService.updateTaskStatus(id, status);
   }
 
 /* NOTE: REMOVE THE COMMENT IN THIS SECTION IN ORDER TO RUN THE PROJECT WITHOUT DATABASE AND NO ENTITIES AT ALL.
