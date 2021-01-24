@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
 
+import * as config from 'config';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -14,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), //this configuration retrieves the jwt token from the header of the request
-      secretOrKey: 'topSecret51' // this is the secret that passport is going to use to verify the signatureof the token. Is the same that the one in auth.module.ts
+      secretOrKey: process.env.JWT_SECRET || config.get('jwt.secret') // this is the secret that passport is going to use to verify the signatureof the token. Is the same that the one in auth.module.ts
     });
   }
 
