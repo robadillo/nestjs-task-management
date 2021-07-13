@@ -9,6 +9,7 @@ import { TaskStatus } from './task-status.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
+import { UpdateTakStatusDto } from './dto/update-task-status.dto';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -53,10 +54,10 @@ export class TasksController {
   @Patch('/:id/status')
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+    @Body() updateTaskStatusDto: UpdateTakStatusDto,
     @GetUser() user: User
   ): Promise<Task> {
-    return this.tasksService.updateTaskStatus(id, status, user);
+    return this.tasksService.updateTaskStatus(id, updateTaskStatusDto.status, user);
   }
 
 /* NOTE: REMOVE THE COMMENT IN THIS SECTION IN ORDER TO RUN THE PROJECT WITHOUT DATABASE AND NO ENTITIES AT ALL.
