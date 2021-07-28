@@ -10,7 +10,7 @@ async function bootstrap() {
     app.enableCors();
   // }
   
-  const port = 3000; // TODO: Change it in order to add the port of the application in the config module
+  const port = process.env.PORT;
   await app.listen(port);
   logger.log(`Application listening on port ${port}`);
 }
