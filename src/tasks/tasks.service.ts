@@ -18,8 +18,8 @@ export class TasksService {
     private taskRepository: TaskRepository) {
   }
 
-  public async getTaskById(id: number, user: User): Promise<Task> {
-    const foundTask = await this.taskRepository.findOne({ where: { id, userId: user.id }});
+  public async getTaskById(id: number, userId: number): Promise<Task> {
+    const foundTask = await this.taskRepository.findOne({ where: { id, userId}});
 
     if (!foundTask) {
       throw new NotFoundException(`Task with <<${id}>> not found`);
@@ -53,15 +53,15 @@ export class TasksService {
   }
 
   public async updateTaskStatus(id: number, status: TaskStatus, user: User): Promise<Task> {
-    const taskFound = await this.getTaskById(id, user);
+    const taskFound = await this.getTaskById(id, user.id);
     taskFound.status = status;
     await taskFound.save();
 
     return taskFound;
   }
 
-  public async getTasks(filterDTO: GetTasksFilterDTO, user: User): Promise<Task[]> {
-    return this.taskRepository.getTasks(filterDTO, user);
+  public async getTasks(filterDTO: GetTasksFilterDTO, userId: number, username: string): Promise<Task[]> {
+    return this.taskRepository.getTasks(filterDTO, userId, username);
   }
 
   /* NOTE: REMOVE THE COMMENT IN THIS SECTION IN ORDER TO RUN THE APPLICATION WITHOUT DATABASE AND ENTITIES NOR TYPEORM

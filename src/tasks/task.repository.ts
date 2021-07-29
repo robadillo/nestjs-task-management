@@ -32,11 +32,12 @@ export class TaskRepository extends Repository<Task> {
     return task;
   }
 
-  public async getTasks(filterDto: GetTasksFilterDTO, user: User): Promise<Task[]> {
+  // Removing the User Entity as an argument in order to prove the Unit Test
+  public async getTasks(filterDto: GetTasksFilterDTO, userId: number, username: string): Promise<Task[]> {
     const { status, search } = filterDto;
     const query = this.createQueryBuilder('task');
 
-    query.where('task.userId = :userId', { userId: user.id})
+    query.where('task.userId = :userId', { userId })
 
     if (status) {
       query.andWhere('task.status = :status', { status }); // We use this andWhere instead of only where because we want to add multiple where closures.
@@ -49,7 +50,7 @@ export class TaskRepository extends Repository<Task> {
       const tasks = await query.getMany();
       return tasks;
     } catch (error) {
-      this.logger.error(`Failed to get tasks for user <${user.username}>, DTO: ${JSON.stringify(filterDto)}`, error.stack);
+      this.logger.error(`Failed to get tasks for user <${username}>, DTO: ${JSON.stringify(filterDto)}`, error.stack);
       throw new InternalServerErrorException();
     }
     
